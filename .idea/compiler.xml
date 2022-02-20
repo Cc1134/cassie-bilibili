@@ -12,4 +12,11 @@
       </profile>
     </annotationProcessing>
   </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="cassie-bilibili-api" options="-parameters" />
+      <module name="cassie-bilibili-dao" options="-parameters" />
+      <module name="cassie-bilibili-service" options="-parameters" />
+    </option>
+  </component>
 </project>
