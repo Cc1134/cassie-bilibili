@@ -1,8 +1,11 @@
 package com.cassie.bilibili.service;
 
 import com.cassie.bilibili.dao.DemoDao;
+import com.sun.javafx.collections.MappingChange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 /**
  * @ClassName: DemoService
@@ -15,7 +18,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class DemoService {
 
-    @Autowired
+    @Autowired//由框架进行赋值
     private DemoDao demoDao;
 
     public Long query(Long id){
