@@ -7,6 +7,7 @@ import com.cassie.bilibili.domain.constant.UserConstant;
 import com.cassie.bilibili.domain.exception.ConditionException;
 import com.cassie.bilibili.service.util.MD5Util;
 import com.cassie.bilibili.service.util.RSAUtil;
+import com.cassie.bilibili.service.util.TokenUtil;
 import com.mysql.cj.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -86,5 +87,48 @@ public class UserService {
     //通过手机号去获取用户，Dao里也有同名方法
     public User getUserByPhone(String phone){
         return userDao.getUserByPhone(phone);
+    }
+
+
+    public String login(User user) throws Exception{
+        //先拿到手机号
+        String phone = user.getPhone();
+        //判断手机号
+        if(StringUtils.isNullOrEmpty(phone)){
+            throw new ConditionException("手机号不能为空！");
+        }
+        User dbUser = this.getUserByPhone(phone);
+        //注册是判断这个用户是不能存在的，登录时判断用户必须存在
+        if(dbUser == null){
+            throw new ConditionException("当前用户不存在！");
+        }
+        //判断用户密码是否匹配
+        String password = user.getPassword();
+        String rawPassword;
+        try{
+            //解密密码
+            rawPassword = RSAUtil.decrypt(password);
+        }catch (Exception e){
+            throw new ConditionException("密码解密失败！");
+        }
+        //盐值在注册的时候生成了，现在直接在数据库里获取
+        String salt = dbUser.getSalt();
+        //然后用数据库里get到的这个salt进行加密，这样就拿到md5加密之后的密码
+        String md5Password = MD5Util.sign(rawPassword,salt,"UTF-8");
+        //对比生成的md5密码和dbUser数据库里存放的是否一样即可（equals是看内容是否一致，不是看地址值）
+        if(!md5Password.equals(dbUser.getPassword())){
+            throw new ConditionException("解密错误！");
+        }
+        //走到这一步说明用户已经判断为合法用户，所以只需要生成用户令牌返回给前端就可以了
+        //具体生成：使用service.util包下的TokenUtil
+        return TokenUtil.generateToken(dbUser.getId());
+
+    }
+
+    public User getUserInfo(Long userId) {
+        User user = userDao.getUserById(userId);
+        UserInfo userInfo = userDao.getUserInfoByUserId(userId);
+        user.setUserInfo(userInfo);
+        return user;
     }
 }

@@ -1,5 +1,6 @@
 package com.cassie.bilibili.api;
 
+import com.cassie.bilibili.api.support.UserSupport;
 import com.cassie.bilibili.domain.JsonResponse;
 import com.cassie.bilibili.domain.User;
 import com.cassie.bilibili.service.UserService;
@@ -19,6 +20,16 @@ public class UserApi {
     //但是这里会有一些问题：稍后的课程会讲解
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserSupport userSupport;
+
+    @GetMapping("/users")
+    public JsonResponse<User> getUserInfo(){
+        Long userId = userSupport.getCurrentUserId();
+        User user = userService.getUserInfo(userId);
+        return new JsonResponse<>(user);
+    }
 
     //此接口用来获取rsa公钥，pks就是publi，结合restful命名规范：名词复数形式+横杠连接
     @GetMapping("/rsa-pks")
@@ -42,4 +53,18 @@ public class UserApi {
         //所以正常来说如果能走到最后一步，这个方法是不会有什么错误的，所以直接调用JsonResponse.success()
         return JsonResponse.success();
     }
+
+    //用户登录接口-逻辑：根据前端传过来的信息判断用户是不是合理的，用户密码是否正确，
+    // 如果正确，就把相关的用户凭证返回给前端
+    //名称：user-tokens。为什么用user-tokens？登录成功后获取到一个用户凭证/用户令牌（user-tokens）
+    //所以做这个登录实际是请求用户令牌这个资源
+    @PostMapping("/user-tokens")
+    //参数@RequestBody User user里有用户名和密码
+    public JsonResponse<String> login(@RequestBody User user) throws Exception{
+        //在userService里新建login()方法 返回凭证/令牌
+        String token = userService.login(user);
+        return new JsonResponse<>(token);
+    }
+
+
 }

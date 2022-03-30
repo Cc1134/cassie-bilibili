@@ -18,6 +18,7 @@ import java.util.List;
 public class JsonHttpMessageConverterConfig {
 
     public static void main(String[] args){
+
         List<Object> list = new ArrayList<>();
         Object o = new Object();
         list.add(o);
@@ -33,8 +34,6 @@ public class JsonHttpMessageConverterConfig {
                                 // 所以要关闭循环引用，就会得到下面那种结果
         //[{},{}]
     }
-
-
 
     @Bean
     @Primary//表示注入类是一个比较高的优先级
@@ -64,6 +63,6 @@ public class JsonHttpMessageConverterConfig {
                 SerializerFeature.DisableCircularReferenceDetect
         );
         fastConverter.setFastJsonConfig(fastJsonConfig);
-        return new HttpMessageConverters();
+        return new HttpMessageConverters(fastConverter);
     }
 }
