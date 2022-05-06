@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 //此注解的意思就是这个类是服务层的一个类，
 // 同时@Service也会在springboot构建的时候，系统会自动把userservice给注入进去，
@@ -92,12 +94,13 @@ public class UserService {
 
     public String login(User user) throws Exception{
         //先拿到手机号
-        String phone = user.getPhone();
+        String phone = user.getPhone() == null ? "" : user.getPhone();
+        String email = user.getEmail() == null ? "" : user.getEmail();
         //判断手机号
-        if(StringUtils.isNullOrEmpty(phone)){
-            throw new ConditionException("手机号不能为空！");
+        if(StringUtils.isNullOrEmpty(phone) && StringUtils.isNullOrEmpty(email)){
+            throw new ConditionException("参数异常！");
         }
-        User dbUser = this.getUserByPhone(phone);
+        User dbUser = userDao.getUserByPhoneOrEmail(phone,email);
         //注册是判断这个用户是不能存在的，登录时判断用户必须存在
         if(dbUser == null){
             throw new ConditionException("当前用户不存在！");
@@ -117,18 +120,50 @@ public class UserService {
         String md5Password = MD5Util.sign(rawPassword,salt,"UTF-8");
         //对比生成的md5密码和dbUser数据库里存放的是否一样即可（equals是看内容是否一致，不是看地址值）
         if(!md5Password.equals(dbUser.getPassword())){
-            throw new ConditionException("解密错误！");
+            throw new ConditionException("密码错误！");
         }
         //走到这一步说明用户已经判断为合法用户，所以只需要生成用户令牌返回给前端就可以了
         //具体生成：使用service.util包下的TokenUtil
         return TokenUtil.generateToken(dbUser.getId());
-
     }
 
     public User getUserInfo(Long userId) {
+        //在Dao里新建方法
+        //在xml新建sql查询语句
         User user = userDao.getUserById(userId);
         UserInfo userInfo = userDao.getUserInfoByUserId(userId);
+        //把get到的user和userInfo整合：在user里添加UserInfo
+        //这样返回的还是user类型，但是嵌套了一层UserInfo的数据格式
         user.setUserInfo(userInfo);
         return user;
+    }
+
+    public void updateUsers(User user) throws Exception{
+        Long id = user.getId();
+        User dbUser = userDao.getUserById(id);
+        if(dbUser == null){
+            throw new ConditionException("用户不存在！");
+        }
+        if(!StringUtils.isNullOrEmpty(user.getPassword())){
+            String rawPassword = RSAUtil.decrypt(user.getPassword());
+            String md5Password = MD5Util.sign(rawPassword,dbUser.getSalt(),"UTF-8");
+            user.setPassword(md5Password);
+        }
+        user.setUpdateTime(new Date());
+        userDao.updateUsers(user);
+    }
+
+    public void updateUserInfos(UserInfo userInfo){
+        userInfo.setUpdateTime(new Date());
+        userDao.updateUserInfos(userInfo);
+
+    }
+
+    public User getUserById(Long followingId) {
+        return userDao.getUserById(followingId);
+    }
+
+    public List<UserInfo> getUserInfoByUserIds(Set<Long> userIdList) {
+        return userDao.getUserInfoByUserIds(userIdList);
     }
 }

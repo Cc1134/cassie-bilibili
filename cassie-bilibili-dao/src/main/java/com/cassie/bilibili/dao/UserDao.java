@@ -3,6 +3,10 @@ package com.cassie.bilibili.dao;
 import com.cassie.bilibili.domain.User;
 import com.cassie.bilibili.domain.UserInfo;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+import java.util.Set;
 
 //用来跟数据库进行交互
 //@Mapper是mybatis的一个注解
@@ -23,4 +27,13 @@ public interface UserDao {
     User getUserById(Long id);
 
     UserInfo getUserInfoByUserId(Long userId);
+
+    Integer updateUsers(User user);
+
+    User getUserByPhoneOrEmail(@Param("phone") String phone, @Param("email") String email);
+
+    Integer updateUserInfos(UserInfo userInfo);
+
+
+    List<UserInfo> getUserInfoByUserIds(Set<Long> userIdList);
 }

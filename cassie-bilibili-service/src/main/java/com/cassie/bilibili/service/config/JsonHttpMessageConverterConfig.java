@@ -28,7 +28,7 @@ public class JsonHttpMessageConverterConfig {
         System.out.println(JSONObject.toJSONString(list,SerializerFeature.DisableCircularReferenceDetect));//关闭循环引用检测
         //output：2
         //[{},{"$ref":"$[0]"}] 第一个是一个json的格式，第二个：当没有关闭循环检测的时候打印出来的数据，里面多出来的字符串是因为
-                                //在做json数据构造的时候发现前面已经有相关的object了，后面引用的就是这个objec，
+                                //在做json数据构造的时候发现前面已经有相关的object了，后面引用的就是这个object，
                                 // 于是就把引用地址或者引用内容相关的地址拿到括号里写进去了，但这并不是一个我们想要的结果
                                 // 实际上就算重复添加，在给前端返回的时候应该是展现相同元素和相同内容展现两次
                                 // 所以要关闭循环引用，就会得到下面那种结果

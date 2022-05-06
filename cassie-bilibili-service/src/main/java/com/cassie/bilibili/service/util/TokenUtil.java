@@ -57,7 +57,7 @@ public class TokenUtil {
             //这样就可以通过未加密的jwt获取userid了
             String userId = jwt.getKeyId();
             return Long.valueOf(userId);
-            //抛出过期异常
+            //抛出令牌过期异常
         }catch (TokenExpiredException e){
             throw new ConditionException("555","token过期！");
         }catch (Exception e){

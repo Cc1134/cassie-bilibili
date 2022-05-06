@@ -3,13 +3,13 @@ package com.cassie.bilibili.api;
 import com.cassie.bilibili.api.support.UserSupport;
 import com.cassie.bilibili.domain.JsonResponse;
 import com.cassie.bilibili.domain.User;
+import com.cassie.bilibili.domain.UserInfo;
 import com.cassie.bilibili.service.UserService;
 import com.cassie.bilibili.service.util.RSAUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
 
 //此注解表示这是一个restful风格的控制器
 @RestController
@@ -24,14 +24,19 @@ public class UserApi {
     @Autowired
     private UserSupport userSupport;
 
+    //获取用户信息
     @GetMapping("/users")
-    public JsonResponse<User> getUserInfo(){
+    public JsonResponse<User> getUserInfo(  ){
+        //具体参数就可以不通过请求体传入了，而是直接从userSupport里获取到，因为有了@Component和@Autowired注解
         Long userId = userSupport.getCurrentUserId();
         User user = userService.getUserInfo(userId);
+        //基于token的身份验证，我们倾向于把用户令牌token放在前端的请求头中，
+        // 通过一个统一的方法，也就是"usersupport"来从请求头中拿到相关的用户信息
+        //这样我的接口在设计上就是一个方法可以复用在多个地方，这样的设计就方便后续开发
         return new JsonResponse<>(user);
     }
 
-    //此接口用来获取rsa公钥，pks就是publi，结合restful命名规范：名词复数形式+横杠连接
+    //此接口用来获取rsa公钥，pks就是public，结合restful命名规范：名词复数形式+横杠连接
     @GetMapping("/rsa-pks")
     public JsonResponse<String> getRsaPublicKey(){
         //这个方法没有参数因为PublicKey是直接存储在后端的，具体放在了RSAUtil里面 见 PUBLIC_KEY
@@ -64,6 +69,26 @@ public class UserApi {
         //在userService里新建login()方法 返回凭证/令牌
         String token = userService.login(user);
         return new JsonResponse<>(token);
+    }
+
+    @PutMapping("/users")
+    public JsonResponse<String> updateUsers(@RequestBody User user) throws Exception{
+        Long userId = userSupport.getCurrentUserId();
+        user.setId(userId);
+        userService.updateUsers(user);
+        return JsonResponse.success();
+    }
+
+    @PutMapping("/user-infos")
+    public JsonResponse<String> updateUserInfos(@RequestBody UserInfo userInfo){
+        //涉及到用户相关的功能：userId一般都是从token里面获取到的，而不是前端传给我们的
+        //如果前端直接传给我们，可能会被拦截，然后仿造一个相同用户id或者其他用户i，被攻击者来利用而获取到用户的相关信息
+        //所以userId通常从token来获取，因为token一般没有办法轻易伪造，就算被拦截，因为token有一个有效期，过了有效期，这个攻击者就不能使用了
+        //所以以后获取userId大部分是使用userSupport.getCurrentUserId()这个方法
+        Long userId = userSupport.getCurrentUserId();
+        userInfo.setUserId(userId);
+        userService.updateUserInfos(userInfo);
+        return JsonResponse.success();
     }
 
 
