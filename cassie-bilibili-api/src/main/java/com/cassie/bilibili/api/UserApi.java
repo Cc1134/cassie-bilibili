@@ -2,6 +2,7 @@ package com.cassie.bilibili.api;
 
 import com.cassie.bilibili.api.support.UserSupport;
 import com.cassie.bilibili.domain.JsonResponse;
+import com.cassie.bilibili.domain.PageResult;
 import com.cassie.bilibili.domain.User;
 import com.cassie.bilibili.domain.UserInfo;
 import com.cassie.bilibili.service.UserService;
@@ -91,5 +92,10 @@ public class UserApi {
         return JsonResponse.success();
     }
 
+    @GetMapping("/user-infos")
+    public JsonResponse<PageResult<UserInfo>> pageResultJsonResponse(@RequestParam Integer no, @RequestParam Integer size, String nick){
+        Long userId = userSupport.getCurrentUserId();
+
+    }
 
 }

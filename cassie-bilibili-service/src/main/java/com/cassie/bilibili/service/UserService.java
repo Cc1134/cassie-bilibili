@@ -94,13 +94,13 @@ public class UserService {
 
     public String login(User user) throws Exception{
         //先拿到手机号
-        String phone = user.getPhone() == null ? "" : user.getPhone();
-        String email = user.getEmail() == null ? "" : user.getEmail();
+        String phone = user.getPhone();
+        String email = user.getEmail();
         //判断手机号
         if(StringUtils.isNullOrEmpty(phone) && StringUtils.isNullOrEmpty(email)){
             throw new ConditionException("参数异常！");
         }
-        User dbUser = userDao.getUserByPhoneOrEmail(phone,email);
+        User dbUser = userDao.getUserByPhoneOrEmail(StringUtils.isNullOrEmpty(phone)?email:phone);
         //注册是判断这个用户是不能存在的，登录时判断用户必须存在
         if(dbUser == null){
             throw new ConditionException("当前用户不存在！");

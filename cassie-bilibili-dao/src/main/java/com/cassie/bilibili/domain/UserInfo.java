@@ -22,6 +22,9 @@ public class UserInfo {
 
     private Date updateTime;
 
+    //如果是true表示已经关注了，否则就是没有关注
+    public Boolean followed;
+
     public Long getId() {
         return id;
     }
@@ -92,5 +95,13 @@ public class UserInfo {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public Boolean getFollowed() {
+        return followed;
+    }
+
+    public void setFollowed(Boolean followed) {
+        this.followed = followed;
     }
 }

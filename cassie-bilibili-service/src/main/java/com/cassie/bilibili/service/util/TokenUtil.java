@@ -64,6 +64,14 @@ public class TokenUtil {
             throw new ConditionException("非法的用户token！");
         }
 
+        //问题在return JWT.create().withKeyId(String.valueOf(userId))
+        //每次拿到token都只用了userId，所以即使密码改变了token也还是有效
+        //当token过期前改密码
+        //每次修改密码，通过dao去改数据库的数据，可以在数据库里加一列去记录修改密码的次数
+        //放进去的sting本来只有userId，现在可以加一个修改密码次数，或者是一个salt值，每次修改密码salt值都变化，就像生成密码的时候生成的盐值
+        //最保险是和生成密码时的salt不一样，用两套salt
+        //还可以在数据库里加一列updateTime记录每一次更新密码的时间，这个时间和下发token的时间进行对比
+        //就是在每次用token进入网站时，拿到token生成的时间，也在数据库拿到updateTime，如果updateTime在生成token之后，就拒绝这个token
     }
 
 }

@@ -30,7 +30,7 @@ public interface UserDao {
 
     Integer updateUsers(User user);
 
-    User getUserByPhoneOrEmail(@Param("phone") String phone, @Param("email") String email);
+    User getUserByPhoneOrEmail(String phoneOrEmail);
 
     Integer updateUserInfos(UserInfo userInfo);
 

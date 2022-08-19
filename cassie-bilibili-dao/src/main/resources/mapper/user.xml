@@ -66,7 +66,13 @@
         from
             t_user_info
         where
-            userId = #{userId}
+            1=1
+            <if test="userIdList != null and userIdList.size > 0">
+                and userId in
+                <foreach collection="userIdList" item="userId" index="indext" open="(" close=")">
+                    #{userId}
+                </foreach>
+            </if>
     </select>
 
     <update id="updateUsers" parameterType="com.cassie.bilibili.domain.User">
@@ -93,7 +99,7 @@
         from
             t_user
         where
-            phone = #{phone} or email = #{email}
+            phone = #{phoneOrEmail} or email = #{phoneOrEmail}
     </select>
 
     <update id="updateUserInfos" parameterType="com.cassie.bilibili.domain.UserInfo">
